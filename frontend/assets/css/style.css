@@ -1,0 +1,545 @@
+
+:root {
+  --primary: #C8102E;
+    --primary-dark: #A50E27;
+    --primary-light: #FCE8EC;
+
+    --bg-main: #F8F9FA;
+    --bg-card: #FFFFFF;
+    --bg-invert: #111827;
+
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --text-muted: #6B7280;
+
+    --border: #D1D5DB;
+    --border-soft: #E5E7EB;
+
+    --selected-border: #1F2937;
+    --selected-fill: #F3F4F6;
+
+    --success: #16A34A;
+    --success-soft: #DCFCE7;
+
+    --incorrect: #B91C1C;
+    --incorrect-soft: #FEE2E2;
+
+    --warning: #F59E0B;
+    --warning-soft: #FEF3C7;
+
+    --shadow-soft: 0 8px 20px rgba(17, 24, 39, 0.06);
+    --shadow-card: 0 14px 35px rgba(17, 24, 39, 0.09);
+    --shadow-primary: 0 10px 24px rgba(200, 16, 46, 0.18);
+}
+
+
+/* ==================================================
+   STREAMLIT GENERAL LAYOUT
+================================================== */
+
+.stApp {
+    background: linear-gradient(
+        135deg,
+        var(--bg-main)
+    );
+    font-family: Arial, sans-serif;
+}
+
+
+header[data-testid="stHeader"] {
+    background: transparent;
+}
+
+/* Hide only Streamlit's menu and footer */
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    display: none;
+}
+
+[data-testid="block-container"],
+[data-testid="stMainBlockContainer"] {
+    max-width: 1400px;
+    padding-top: 12px;
+    padding-bottom: 0;
+}
+
+
+/* ==================================================
+   LOGIN CONTAINER
+================================================== */
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    max-width: 980px;
+    margin: 10px auto 0;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(17,24,39,.10);
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] > div {
+    padding: 0;
+}
+
+.left-panel,
+.right-panel {
+    min-height: auto;
+}
+
+.left-panel {
+    padding: 0 25px 10px;
+    text-align: center;
+}
+
+.right-panel {
+    padding-top: 24px;
+}
+
+
+/* ==================================================
+   BRAND
+================================================== */
+
+.brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 6px;
+}
+
+.brand-logo {
+    width: 95px;
+    height: 95px;
+    margin-top: 0;
+    margin-right: -8px;
+    object-fit: contain;
+}
+
+.brand-title {
+    color: var(--text-primary);
+    font-size: 42px;
+    font-weight: 800;
+}
+
+.subtitle {
+    margin: 4px auto 12px;
+    color: var(--text-primary);
+    font-size: 18px;
+    text-align: center;
+}
+
+
+/* ==================================================
+   FEATURES
+================================================== */
+
+.features {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    color: var(--text-primary);
+    font-size: 14px;
+    text-align: left;
+}
+
+.feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.feature-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--primary);
+    font-weight: 700;
+    box-shadow: var(--shadow-soft);
+}
+
+
+/* ==================================================
+   LOGIN FORM
+================================================== */
+
+.form-title {
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.form-title h2 {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-size: 30px;
+}
+
+.form-title p {
+    color: var(--text-secondary);
+    font-size: 17px;
+}
+
+.stButton > button {
+    height: 60px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.stButton > button[kind="primary"] {
+    border-color: var(--primary);
+    background: var(--bg-card);
+    color: var(--primary-dark);
+}
+
+[data-testid="stTextInput"] label {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+[data-testid="stTextInput"] input {
+    height: 55px;
+    border-radius: 8px;
+}
+
+[data-testid="stFormSubmitButton"] button {
+    height: 58px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-dark)
+    );
+    color: var(--bg-card);
+    font-weight: 800;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 25px 0;
+    color: var(--text-secondary);
+}
+
+.divider span {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.google-btn {
+    width: 100%;
+    height: 55px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.signup {
+    margin-top: 25px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.signup a {
+    color: var(--primary-dark);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+
+/* ==================================================
+   SIDEBAR
+================================================== */
+
+section[data-testid="stSidebar"] {
+    border-right: 1px solid var(--border-soft);
+    background: var(--bg-card);
+    box-shadow: 8px 0 25px rgba(17,24,39,.06);
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    margin-top: -55px;
+    margin-bottom: 35px;
+}
+
+.sidebar-logo img {
+    width: 58px;
+    height: 58px;
+}
+
+.sidebar-logo h1 {
+    margin: 0;
+    color: var(--primary);
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.sidebar-logo p {
+    margin: -4px 0 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.sidebar-btn {
+    width: calc(100% - 40px) !important;
+    height: 52px !important;
+    min-height: 52px !important;
+
+    margin: 2px 20px !important;
+    padding: 7px 14px !important;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    border-radius: 20px !important;
+    box-sizing: border-box;
+
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sidebar-btn:hover {
+    transform: translateX(6px);
+    background: var(--border-soft);
+    color: var(--primary-dark);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+}
+
+.sidebar-btn.active {
+    background: var(--primary);
+    color: var(--bg-card);
+    box-shadow: var(--shadow-primary);
+    border-radius: 20px !important;
+}
+
+/* Icon container */
+.sidebar-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The actual SVG */
+.sidebar-icon svg {
+    width: 32px !important;
+    height: 32px !important;
+    display: block;
+}
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 70px;
+    padding: 14px;
+    border-radius: 18px;
+    background: linear-gradient(
+        135deg,
+        var(--border-soft),
+        var(--primary-light)
+    );
+}
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-dark)
+    );
+    color: var(--bg-card);
+}
+
+.sidebar-wave {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 18.5rem;
+    height: 80px;
+    border-radius: 60% 60% 0 0;
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-dark)
+    );
+    opacity: 0.9;
+}
+
+
+/* ==================================================
+   DASHBOARD HEADER
+================================================== */
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 25px 25px;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 30px;
+}
+
+.dashboard-header p {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 15px;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    font-size: 22px;
+}
+
+.avatar {
+    display: grid;
+    width: 45px;
+    height: 45px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--success);
+    color: var(--bg-card);
+}
+
+
+/* ==================================================
+   STATISTICS CARDS
+================================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    margin: 0 25px;
+}
+
+.stat-card {
+    padding: 24px 22px;
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 45px rgba(17,24,39,.12);
+}
+
+.stat-icon {
+    display: grid;
+    width: 55px;
+    height: 55px;
+    margin-bottom: 18px;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 25px;
+}
+
+.stat-card p {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.stat-card h2 {
+    margin: 10px 0;
+    font-size: 34px;
+    font-weight: 800;
+}
+
+.stat-card small {
+    font-weight: 700;
+}
+
+
+/* Green card */
+
+.stat-card.green .stat-icon {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.stat-card.green h2,
+.stat-card.green small {
+    color: var(--success);
+}
+
+
+/* Orange card */
+
+.stat-card.orange .stat-icon {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.stat-card.orange h2,
+.stat-card.orange small {
+    color: var(--warning);
+}
+
+
+/* ==================================================
+   RESPONSIVE DESIGN
+================================================== */
+
+@media (max-width: 1000px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .features {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 650px) {
+    .dashboard-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        margin: 0 12px;
+    }
+
+    .brand-title {
+        font-size: 34px;
+    }
+}

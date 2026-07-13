@@ -3,7 +3,11 @@ from PIL import Image
 from pathlib import Path
 import base64
 
-logo=Image.open("frontend/assets/logo.png")
+css_path = Path(__file__).resolve().parent.parent / "assets" / "css" / "style.css"
+with open(css_path, encoding="utf-8") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+logo=Image.open("frontend/assets/images/logo.png")
 
 st.set_page_config(
     page_title="Quizy | Connexion",
@@ -19,231 +23,6 @@ if "role" not in st.session_state:
 def set_role(role: str):
     st.session_state.role = role
 
-st.markdown("""
-<style>
-:root {
-    --purple-darkest: #2E1A5E;
-    --purple-primary: #5B35F5;
-    --purple-medium: #6741F2;
-    --purple-dark: #431DE0;
-    --purple-soft: #EDE9FE;
-    --purple-pale: #F5F3FF;
-
-    --bg-main: #FBFCFF;
-    --bg-secondary: #F6F7FF;
-    --bg-card: #FFFFFF;
-    --bg-soft: #F8F7FF;
-
-    --text-primary: #2E1A5E;
-    --text-secondary: #526089;
-    --text-muted: #7C86A5;
-    --text-light: #9CA3B8;
-
-    --border-primary: #D9DFF1;
-    --border-soft: #E3E6F5;
-    --border-purple: #CFC5FF;
-
-    --success: #22B88A;
-    --success-soft: #E8F8F3;
-    --warning: #F4A340;
-    --warning-soft: #FFF4E5;
-    --danger: #E85D75;
-    --danger-soft: #FDECEF;
-    --info: #5B8DEF;
-    --info-soft: #EDF4FF;
-
-    --shadow-soft: 0 10px 25px rgba(80, 70, 150, 0.08);
-    --shadow-card: 0 15px 35px rgba(80, 70, 150, 0.12);
-    --shadow-purple: 0 10px 25px rgba(91, 53, 245, 0.18);
-[data-testid="stHeader"], #MainMenu, footer {display:none;}
-
-.stApp {
-    background: linear-gradient(135deg, var(--bg-main), var(--bg-secondary));
-    font-family: Arial, sans-serif;
-}
-
-[data-testid="stHeader"] {
-    display: none !important;
-    height: 0px !important;
-}
-
-[data-testid="block-container"],
-[data-testid="stMainBlockContainer"] {
-    max-width: 1400px;
-    padding-top: 12px;
-    padding-bottom: 0;
-}
-
-[data-testid="stVerticalBlockBorderWrapper"] {
-    max-width: 980px !important;
-    margin: 10px auto 0 auto !important;
-    border-radius: 18px !important;
-    overflow: hidden !important;
-    box-shadow: 0 25px 70px rgba(80, 70, 150, 0.15) ;
-    border: 1px solid var(--border-soft) ;
-}
-
-[data-testid="stVerticalBlockBorderWrapper"] > div {
-    padding: 0px !important;
-}
-
-.left-panel,
-.right-panel {
-    min-height: auto;
-}
-
-.left-panel {
-    padding: 0px 25px 10px 25px;
-    text-align: center;
-}
-
-.right-panel {
-    padding-top: 24px ;
-}
-
-.brand-row {
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-}
-
-.brand-logo {
-    width: 95px;
-    height: 95px;
-    object-fit: contain;
-    margin-top: 6px;
-    margin-right: -8px;
-    margin-top: 0;
-}
-
-.brand-title {
-    color: var(--purple-darkest);
-    font-size: 42px;
-    font-weight: 800;
-}
-
-.subtitle {
-    color: var(--purple-darkest)  ; 
-    font-size: 18px;
-    margin: 4px auto 12px;
-    text-align: center;
-}
-
-.features {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    text-align: left;
-    font-size: 14px;
-    color: var(--purple-darkest);
-}
-
-.feature {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.feature-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-     background: var(--bg-card);
-    color: var(--purple-primary);
-    display: grid;
-    place-items: center;
-    font-weight: bold;
-    box-shadow: var(--shadow-soft);
-}
-
-.form-title {
-    text-align: center;
-    margin-bottom: 18px;
-}
-
-.form-title h2 {
-    color: var(--purple-darkest);
-    font-size: 30px;
-    margin-bottom: 8px;
-}
-
-.form-title p {
-    color: var(--text-secondary);
-    font-size: 17px;
-}
-
-.stButton > button {
-    height: 60px;
-    border-radius: 8px;
-    font-weight: 700;
-    border: 1px solid var(--border-primary);
-}
-
-.stButton > button[kind="primary"] {
-     background: var(--bg-card);
-    color: var(--purple-dark);
-    border: 1px solid var(--purple-primary);
-}
-
-[data-testid="stTextInput"] label {
-    color: var(--purple-darkest);
-    font-weight: 700;
-}
-
-[data-testid="stTextInput"] input {
-    height: 55px;
-    border-radius: 8px;
-}
-
-[data-testid="stFormSubmitButton"] button {
-    height: 58px;
-    border-radius: 8px;
-    border: none;
-    color: white;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--purple-medium), var(--purple-dark));
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin: 25px 0;
-    color: var(--text-secondary);
-}
-
-.divider span {
-    flex: 1;
-    height: 1px;
-    background: var(--border-primary);
-}
-
-.google-btn {
-    width: 100%;
-    height: 55px;
-    border-radius: 8px;
-     border: 1px solid var(--border-primary);
-    background: var(--bg-card);
-    font-weight: 700;
-    color: var(--purple-darkest);
-}
-
-.signup {
-    text-align: center;
-    color: var(--text-secondary);
-    margin-top: 25px;
-}
-
-.signup a {
-    color: var(--purple-dark);
-    font-weight: 800;
-    text-decoration: none;
-}
-</style>
-""", unsafe_allow_html=True)
-
 with st.container(border=True):
     left, right = st.columns([0.8, 0.8], gap="xxsmall")
 
@@ -251,7 +30,7 @@ with left:
     st.markdown('<div class="left-panel">', unsafe_allow_html=True)
 
     BASE_DIR = Path(__file__).resolve().parent.parent
-    LOGO_PATH = BASE_DIR / "assets" / "logo.png"
+    LOGO_PATH = BASE_DIR / "assets" / "images" / "logo.png"
     logo_base64 = base64.b64encode(LOGO_PATH.read_bytes()).decode()
 
     st.markdown(f"""
@@ -262,7 +41,7 @@ with left:
         <p class="subtitle">Votre assistant pédagogique intelligent</p>
     """, unsafe_allow_html=True)
 
-    IMAGE_PATH = BASE_DIR / "assets" / "login.png"
+    IMAGE_PATH = BASE_DIR / "assets" /"images" / "login.png"
     st.image(str(IMAGE_PATH), use_container_width=True)
 
     st.markdown("""
