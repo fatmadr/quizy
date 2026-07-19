@@ -513,6 +513,7 @@ section[data-testid="stSidebar"] {
 }
 
 
+
 /* ==================================================
    RESPONSIVE DESIGN
 ================================================== */
@@ -542,4 +543,312 @@ section[data-testid="stSidebar"] {
     .brand-title {
         font-size: 34px;
     }
+}
+
+/* ==================================================
+   DOCUMENTS PAGE HEADER
+================================================== */
+
+.st-key-documents-header {
+    margin: 4px 25px 24px;
+}
+
+.st-key-documents-header [data-testid="stHorizontalBlock"] {
+    align-items: center;
+}
+
+.documents-title h1 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 28px;
+    font-weight: 800;
+    transform: translateY(-13px);
+}
+
+.documents-title p {
+    margin: -20px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+
+/* Search */
+
+.st-key-documents-search {
+    max-width: 270px;
+    margin-left: auto;
+}
+
+.st-key-documents-search input {
+    height: 42px;
+    min-height: 42px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--bg-card);
+    font-size: 13px;
+}
+
+
+/* Upload */
+
+.st-key-upload-document button {
+    height: 42px;
+    min-height: 42px;
+    padding: 0 13px;
+    border: none;
+    border-radius: 7px;
+    background: var(--primary);
+    color: var(--bg-card);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.st-key-upload-document button:hover {
+    border: none;
+    background: var(--primary-dark);
+    color: var(--bg-card);
+}
+
+
+/* ==================================================
+   DOCUMENTS TABLE CONTAINER
+================================================== */
+
+.st-key-documents-table {
+    margin: 35px 25px 25px -24px ;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-soft);
+}
+
+.st-key-documents-table > div {
+    gap: 0;
+}
+
+
+/* Toolbar */
+
+.st-key-documents-table > div > div:first-child {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.documents-table-heading {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.st-key-documents-search,
+.st-key-upload-document {
+    transform: translateY(-4px);
+}
+
+.st-key-subject-filter,
+.st-key-sort-filter {
+    max-width: 130px;
+    margin-left: auto;
+}
+
+.st-key-subject-filter [data-baseweb="select"] > div,
+.st-key-sort-filter [data-baseweb="select"] > div {
+    min-height: 38px;
+    border-radius: 7px;
+    font-size: 12px;
+}
+
+
+/* List and grid buttons */
+
+.st-key-list-view button,
+.st-key-grid-view button {
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border-radius: 7px;
+    background: var(--bg-card);
+    font-size: 16px;
+}
+
+.st-key-list-view button {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+
+/* ==================================================
+   TABLE HEADER
+================================================== */
+
+.table-column-title {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.st-key-documents-table > div > div:nth-child(2) {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--bg-main);
+}
+
+
+/* ==================================================
+   DOCUMENT ROWS
+================================================== */
+
+[class*="st-key-document-row-"] {
+    margin: 0;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--bg-card);
+}
+
+[class*="st-key-document-row-"]:hover {
+    background: var(--primary-light);
+}
+
+.document-info {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.document-file-icon {
+    display: grid;
+    width: 31px;
+    height: 36px;
+    min-width: 31px;
+    place-items: center;
+    border-radius: 6px;
+    color: var(--bg-card);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.document-file-icon.pdf {
+    background: var(--primary);
+}
+
+.document-file-icon.docx {
+    background: #2563EB;
+}
+
+.document-file-icon.pptx {
+    background: #EA580C;
+}
+
+.document-text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.document-text strong {
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-text small {
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subject-badge {
+    display: inline-flex;
+    width: fit-content;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.document-date {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.document-date small {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.document-size {
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+
+/* Row buttons */
+
+[class*="st-key-view-"] button,
+[class*="st-key-download-"] button,
+[class*="st-key-more-"] button {
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    border: 1px solid var(--border-soft);
+    border-radius: 7px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 13px;
+    box-shadow: none;
+}
+
+[class*="st-key-view-"] button:hover,
+[class*="st-key-download-"] button:hover,
+[class*="st-key-more-"] button:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+
+/* ==================================================
+   TABLE FOOTER
+================================================== */
+
+.st-key-documents-table > div > div:last-child {
+    padding: 9px 16px;
+}
+
+.documents-count {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.st-key-previous-page button,
+.st-key-page-1 button,
+.st-key-page-2 button,
+.st-key-page-3 button,
+.st-key-next-page button {
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+    padding: 0;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.st-key-page-1 button {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--bg-card);
 }
