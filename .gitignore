@@ -1,0 +1,9 @@
+# Private environment variables
+.env
+
+# Python virtual environment
+.venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
