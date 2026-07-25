@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import URL, create_engine, text
+from sqlalchemy.orm import Session, sessionmaker
 
 
 # ==================================================
@@ -72,6 +73,17 @@ engine = create_engine(
 
 
 # ==================================================
+# CREATE THE SESSION FACTORY
+# ==================================================
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    expire_on_commit=False,
+)
+
+
+# ==================================================
 # TEST THE DATABASE CONNECTION
 # ==================================================
 
@@ -90,5 +102,25 @@ def test_connection() -> None:
         print(f"Error: {error}")
 
 
+# ==================================================
+# TEST THE SQLALCHEMY SESSION
+# ==================================================
+
+def test_session() -> None:
+    try:
+        with SessionLocal() as session:
+            database_name = session.execute(
+                text("SELECT current_database();")
+            ).scalar_one()
+
+        print("SQLAlchemy session successful!")
+        print(f"Session connected to: {database_name}")
+
+    except Exception as error:
+        print("SQLAlchemy session failed.")
+        print(f"Error: {error}")
+
+
 if __name__ == "__main__":
     test_connection()
+    test_session()
