@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     BigInteger,
@@ -14,10 +15,13 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database.base import Base
 
+if TYPE_CHECKING:
+    from backend.models.question import Question
+    from backend.models.question_option import QuestionOption
+    from backend.models.quiz_attempt import QuizAttempt
 
 class StudentAnswer(Base):
     __tablename__ = "student_answers"
@@ -98,4 +102,16 @@ class StudentAnswer(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+
+    attempt: Mapped["QuizAttempt"] = relationship(
+        back_populates="answers",
+    )
+
+    question: Mapped["Question"] = relationship(
+        back_populates="student_answers",
+    )
+
+    selected_option: Mapped[Optional["QuestionOption"]] = relationship(
+        back_populates="student_answers",
     )

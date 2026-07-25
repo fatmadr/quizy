@@ -9,10 +9,13 @@ from sqlalchemy import (
     UniqueConstraint,
     false,
 )
-from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database.base import Base
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from backend.models.question import Question
+    from backend.models.student_answer import StudentAnswer
 
 class QuestionOption(Base):
     __tablename__ = "question_options"
@@ -59,4 +62,13 @@ class QuestionOption(Base):
     position: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
+    )
+
+    question: Mapped["Question"] = relationship(
+        back_populates="options",
+    )
+
+    student_answers: Mapped[list["StudentAnswer"]] = relationship(
+        back_populates="selected_option",
+        passive_deletes=True,
     )

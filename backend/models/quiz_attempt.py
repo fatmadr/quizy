@@ -14,10 +14,15 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database.base import Base
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from backend.models.quiz import Quiz
+    from backend.models.user import User
+    from backend.models.student_answer import StudentAnswer
 
 class QuizAttempt(Base):
     __tablename__ = "quiz_attempts"
@@ -104,4 +109,18 @@ class QuizAttempt(Base):
     submitted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
+    )
+
+    quiz: Mapped["Quiz"] = relationship(
+        back_populates="attempts",
+    )
+
+    student: Mapped["User"] = relationship(
+        back_populates="quiz_attempts",
+    )
+
+    answers: Mapped[list["StudentAnswer"]] = relationship(
+        back_populates="attempt",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )

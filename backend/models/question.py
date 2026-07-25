@@ -11,10 +11,16 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database.base import Base
 
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from backend.models.quiz import Quiz
+    from backend.models.question_option import QuestionOption
+    from backend.models.student_answer import StudentAnswer
 
 class Question(Base):
     __tablename__ = "questions"
@@ -79,4 +85,21 @@ class Question(Base):
     explanation: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
+    )
+
+    quiz: Mapped["Quiz"] = relationship(
+        back_populates="questions",
+    )
+
+    options: Mapped[list["QuestionOption"]] = relationship(
+        back_populates="question",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="QuestionOption.position",
+    )
+
+    student_answers: Mapped[list["StudentAnswer"]] = relationship(
+        back_populates="question",
+        cascade="all, delete",
+        passive_deletes=True,
     )

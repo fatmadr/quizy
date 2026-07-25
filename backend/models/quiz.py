@@ -13,9 +13,15 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-
 from backend.database.base import Base
 
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from backend.models.document import Document
+    from backend.models.question import Question
+    from backend.models.quiz_attempt import QuizAttempt
 
 class Quiz(Base):
     __tablename__ = "quizzes"
@@ -90,4 +96,21 @@ class Quiz(Base):
     published_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
+    )
+
+    document: Mapped["Document"] = relationship(
+        back_populates="quizzes",
+    )
+
+    questions: Mapped[list["Question"]] = relationship(
+        back_populates="quiz",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="Question.position",
+    )
+
+    attempts: Mapped[list["QuizAttempt"]] = relationship(
+        back_populates="quiz",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )

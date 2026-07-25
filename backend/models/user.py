@@ -1,10 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, DateTime, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database.base import Base
 
+if TYPE_CHECKING:
+    from backend.models.document import Document
+    from backend.models.quiz_attempt import QuizAttempt
 
 class User(Base):
     __tablename__ = "users"
@@ -52,4 +56,16 @@ class User(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+
+    documents: Mapped[list["Document"]] = relationship(
+        back_populates="teacher",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+    quiz_attempts: Mapped[list["QuizAttempt"]] = relationship(
+        back_populates="student",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )

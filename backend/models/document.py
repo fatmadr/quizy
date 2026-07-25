@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy import (
     BigInteger,
@@ -14,6 +16,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.database.base import Base
 
+if TYPE_CHECKING:
+    from backend.models.quiz import Quiz
+    from backend.models.user import User
 
 class Document(Base):
     __tablename__ = "documents"
@@ -84,4 +89,14 @@ class Document(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+
+    teacher: Mapped["User"] = relationship(
+        back_populates="documents",
+    )
+
+    quizzes: Mapped[list["Quiz"]] = relationship(
+        back_populates="document",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
