@@ -258,6 +258,105 @@ footer {
     text-decoration: none;
 }
 
+/* ==================================================
+   REGISTER PAGE
+================================================== */
+
+body:has(.register-page-marker) [data-testid="stHeader"] {
+    display: none;
+}
+
+body:has(.register-page-marker) #MainMenu,
+body:has(.register-page-marker) footer {
+    display: none;
+}
+
+/* Smaller page width */
+body:has(.register-page-marker)
+[data-testid="stMainBlockContainer"] {
+    max-width: 620px;
+    padding-top: 14px;
+    padding-bottom: 10px;
+}
+
+/* Registration title */
+body:has(.register-page-marker) h1 {
+    margin: 0;
+    text-align: center;
+    font-size: 30px;
+    color: #1f2937;
+}
+
+body:has(.register-page-marker) .register-subtitle {
+    margin: 2px 0 12px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Registration form box */
+body:has(.register-page-marker)
+div[data-testid="stForm"] {
+    padding: 14px 18px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+}
+
+/* Smaller spacing between fields */
+body:has(.register-page-marker)
+div[data-testid="stForm"]
+div[data-testid="stVerticalBlock"] {
+    gap: 7px;
+}
+
+/* Labels */
+body:has(.register-page-marker)
+div[data-testid="stForm"] label p {
+    margin-bottom: 2px;
+    font-size: 13px;
+}
+
+/* Text inputs */
+body:has(.register-page-marker)
+div[data-testid="stForm"]
+div[data-baseweb="input"] {
+    min-height: 40px;
+}
+
+body:has(.register-page-marker)
+div[data-testid="stForm"]
+div[data-baseweb="input"] input {
+    padding: 8px 10px;
+    font-size: 14px;
+}
+
+/* Role selectbox */
+body:has(.register-page-marker)
+div[data-testid="stForm"]
+div[data-baseweb="select"] > div {
+    min-height: 40px;
+}
+
+/* Create-account button */
+body:has(.register-page-marker)
+div[data-testid="stFormSubmitButton"] button {
+    min-height: 42px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 9px;
+    background: #c8102e;
+    color: #ffffff;
+}
+
+/* Return-to-login button */
+body:has(.register-page-marker)
+div[data-testid="stButton"] button {
+    min-height: 38px;
+    margin-top: 4px;
+    border-radius: 9px;
+}
 
 /* ==================================================
    SIDEBAR

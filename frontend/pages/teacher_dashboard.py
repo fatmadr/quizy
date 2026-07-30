@@ -1,4 +1,5 @@
 import base64
+from html import escape
 from pathlib import Path
 
 import streamlit as st
@@ -29,6 +30,44 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# User must be logged in
+if not st.session_state.get("logged_in", False):
+    st.switch_page("app.py")
+
+# User must be a teacher
+if st.session_state.get("role") != "teacher":
+    st.switch_page("pages/student_dashboard.py")
+
+# ==================================================
+# CURRENT TEACHER
+# ==================================================
+
+first_name = st.session_state.get("first_name") or "Teacher"
+last_name = st.session_state.get("last_name") or ""
+
+teacher_name = escape(
+    f"{first_name} {last_name}".strip()
+)
+
+
+# ==================================================
+# LOGOUT
+# ==================================================
+
+def logout() -> None:
+    authentication_keys = [
+        "logged_in",
+        "user_id",
+        "first_name",
+        "last_name",
+        "email",
+        "role",
+    ]
+
+    for key in authentication_keys:
+        st.session_state.pop(key, None)
+
+    st.switch_page("app.py")
 
 # ==================================================
 # LOAD CSS
@@ -105,14 +144,9 @@ sidebar_html = (
     f'<div class="profile-card">'
     f'<div class="profile-avatar">👤</div>'
     f'<div>'
-    f'<b>Mme. Amira</b><br>'
+    f'<b>{teacher_name}</b><br>'
     f'<small>Teacher</small>'
     f'</div>'
-    f'</div>'
-
-    f'<div class="sidebar-btn">'
-    f'<span class="sidebar-logout-icon">↪</span>'
-    f'<span>Logout</span>'
     f'</div>'
 
     f'<div class="sidebar-wave"></div>'
@@ -124,6 +158,13 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+    if st.button(
+            "↪ Logout",
+            key="logout_button",
+            use_container_width=True,
+    ):
+        logout()
+
 
 # ==================================================
 # DASHBOARD CONTENT
@@ -132,7 +173,7 @@ with st.sidebar:
 dashboard_html = (
     '<div class="dashboard-header">'
         '<div>'
-            '<h1>Welcome back, Mme. Amira! 👋</h1>'
+            f'<h1>Welcome back, {teacher_name}! 👋</h1>'
             '<p>Here’s what’s happening in your classroom.</p>'
         '</div>'
         '<div class="header-icons">'
