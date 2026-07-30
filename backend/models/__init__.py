@@ -5,3 +5,4 @@ from backend.models.quiz_attempt import QuizAttempt
 from backend.models.quiz import Quiz
 from backend.models.student_answer import StudentAnswer
 from backend.models.user import User
+from backend.models.auth_session import AuthSession

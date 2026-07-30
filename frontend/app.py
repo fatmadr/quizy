@@ -1,3 +1,4 @@
+import time
 import base64
 import sys
 from pathlib import Path
@@ -5,6 +6,9 @@ from pathlib import Path
 import streamlit as st
 from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
+
+from streamlit_cookies_controller import CookieController
+
 
 # ==================================================
 # ALLOW PYTHON TO FIND THE BACKEND FOLDER
@@ -17,6 +21,10 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from backend.database.connection import SessionLocal
 from backend.services.auth_service import authenticate_user
+from backend.services.auth_session_service import (
+    create_auth_session,
+    get_user_from_token,
+)
 
 # ==================================================
 # PATHS
@@ -42,6 +50,20 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# ==================================================
+# COOKIE
+# ==================================================
+
+COOKIE_NAME = "quizy_session"
+print(
+    "Quizy cookie found:",
+    bool(st.context.cookies.get(COOKIE_NAME)),
+)
+COOKIE_MAX_AGE = 365 * 24 * 60 * 60
+
+cookie_controller = CookieController(
+    key="quizy_login_cookie",
+)
 
 # ==================================================
 # LOAD CSS
@@ -73,6 +95,56 @@ for key, default_value in AUTH_STATE_DEFAULTS.items():
     if key not in st.session_state:
         st.session_state[key] = default_value
 
+# ==================================================
+# RESTORE LOGIN FROM COOKIE
+# ==================================================
+
+if not st.session_state.logged_in:
+    session_token = st.context.cookies.get(
+        COOKIE_NAME
+    )
+
+    if session_token:
+        try:
+            with SessionLocal() as session:
+                user = get_user_from_token(
+                    session=session,
+                    token=session_token,
+                )
+
+                if user is not None:
+                    user_data = {
+                        "user_id": user.user_id,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "email": user.email,
+                        "role": user.role,
+                    }
+                else:
+                    user_data = None
+
+            if user_data is not None:
+                st.session_state.logged_in = True
+                st.session_state.user_id = (
+                    user_data["user_id"]
+                )
+                st.session_state.first_name = (
+                    user_data["first_name"]
+                )
+                st.session_state.last_name = (
+                    user_data["last_name"]
+                )
+                st.session_state.email = (
+                    user_data["email"]
+                )
+                st.session_state.role = (
+                    user_data["role"]
+                )
+
+        except SQLAlchemyError as error:
+            print(
+                f"Cookie restoration error: {error}"
+            )
 
 # ==================================================
 # REDIRECT LOGGED-IN USERS
@@ -270,6 +342,23 @@ with st.container(border=True):
                         )
 
                     else:
+                        with SessionLocal() as session:
+                            session_token = create_auth_session(
+                                session=session,
+                                user_id=user_data["user_id"],
+                            )
+
+                        cookie_controller.set(
+                            COOKIE_NAME,
+                            session_token,
+                            path="/",
+                            max_age=COOKIE_MAX_AGE,
+                            same_site="strict",
+                            secure=False,
+                        )
+                        # Give the browser time to save the cookie
+                        time.sleep(1)
+
                         st.session_state.logged_in = True
                         st.session_state.user_id = user_data["user_id"]
                         st.session_state.first_name = user_data["first_name"]

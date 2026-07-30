@@ -1,3 +1,4 @@
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -12,7 +13,6 @@ from backend.services.user_service import (
     create_user,
     get_user_by_email,
 )
-
 
 # ==================================================
 # REGISTER USER

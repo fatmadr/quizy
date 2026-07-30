@@ -1,6 +1,9 @@
+import sys
 import base64
 from html import escape
 from pathlib import Path
+from sqlalchemy.exc import SQLAlchemyError
+from streamlit_cookies_controller import CookieController
 
 import streamlit as st
 from PIL import Image
@@ -9,6 +12,19 @@ from PIL import Image
 # ==================================================
 # PATHS
 # ==================================================
+
+PROJECT_ROOT = (
+    Path(__file__).resolve().parent.parent.parent
+)
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from backend.database.connection import SessionLocal
+from backend.services.auth_session_service import (
+    delete_auth_session,
+    get_user_from_token,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +45,67 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ==================================================
+# COOKIE
+# ==================================================
+
+COOKIE_NAME = "quizy_session"
+
+cookie_controller = CookieController(
+    key="teacher_dashboard_cookie",
+)
+
+# ==================================================
+# RESTORE LOGIN AFTER REFRESH
+# ==================================================
+
+if not st.session_state.get("logged_in", False):
+    session_token = st.context.cookies.get(
+        COOKIE_NAME
+    )
+
+    if session_token:
+        try:
+            with SessionLocal() as session:
+                user = get_user_from_token(
+                    session=session,
+                    token=session_token,
+                )
+
+                if user is not None:
+                    user_data = {
+                        "user_id": user.user_id,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "email": user.email,
+                        "role": user.role,
+                    }
+                else:
+                    user_data = None
+
+            if user_data is not None:
+                st.session_state.logged_in = True
+                st.session_state.user_id = (
+                    user_data["user_id"]
+                )
+                st.session_state.first_name = (
+                    user_data["first_name"]
+                )
+                st.session_state.last_name = (
+                    user_data["last_name"]
+                )
+                st.session_state.email = (
+                    user_data["email"]
+                )
+                st.session_state.role = (
+                    user_data["role"]
+                )
+
+        except SQLAlchemyError as error:
+            print(
+                f"Session restoration error: {error}"
+            )
 
 # User must be logged in
 if not st.session_state.get("logged_in", False):
@@ -55,6 +132,33 @@ teacher_name = escape(
 # ==================================================
 
 def logout() -> None:
+    session_token = st.context.cookies.get(
+        COOKIE_NAME
+    )
+
+    if session_token:
+        try:
+            with SessionLocal() as session:
+                delete_auth_session(
+                    session=session,
+                    token=session_token,
+                )
+
+        except SQLAlchemyError as error:
+            print(
+                f"Logout database error: {error}"
+            )
+
+    try:
+        cookie_controller.remove(
+            COOKIE_NAME,
+            path="/",
+            same_site="strict",
+            secure=False,
+        )
+    except KeyError:
+        pass
+
     authentication_keys = [
         "logged_in",
         "user_id",
