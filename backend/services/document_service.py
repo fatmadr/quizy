@@ -80,12 +80,14 @@ def create_document(
     title: str,
     original_filename: str,
     file_path: str,
+    subject: str,
     file_type: str | None = None,
     file_size_bytes: int | None = None,
 ) -> Document:
     cleaned_title = title.strip()
     cleaned_filename = original_filename.strip()
     cleaned_file_path = file_path.strip()
+    cleaned_subject = subject.strip()
 
     if not cleaned_title:
         raise ValueError("Document title is required.")
@@ -107,6 +109,14 @@ def create_document(
 
     if not cleaned_file_path:
         raise ValueError("The file path is required.")
+
+    if not cleaned_subject:
+        raise ValueError("Document subject is required.")
+
+    if len(cleaned_subject) > 100:
+        raise ValueError(
+            "Document subject cannot exceed 100 characters."
+        )
 
     if file_size_bytes is not None and file_size_bytes < 0:
         raise ValueError(
@@ -138,6 +148,7 @@ def create_document(
         title=cleaned_title,
         original_filename=cleaned_filename,
         file_path=cleaned_file_path,
+        subject=cleaned_subject,
         file_type=(
             file_type.strip()
             if file_type is not None

@@ -489,6 +489,16 @@ section[data-testid="stSidebar"] {
     opacity: 0.9;
 }
 
+a.sidebar-btn {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.sidebar-btn:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
 
 /* ==================================================
    DASHBOARD HEADER

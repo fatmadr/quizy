@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy import (
     BigInteger,
@@ -12,13 +11,19 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from backend.database.base import Base
+
 
 if TYPE_CHECKING:
     from backend.models.quiz import Quiz
     from backend.models.user import User
+
 
 class Document(Base):
     __tablename__ = "documents"
@@ -67,6 +72,11 @@ class Document(Base):
     file_path: Mapped[str] = mapped_column(
         Text,
         nullable=False,
+    )
+
+    subject: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
     )
 
     file_type: Mapped[str | None] = mapped_column(
