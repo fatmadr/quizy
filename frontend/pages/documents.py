@@ -1,6 +1,5 @@
 import base64
 import sys
-from html import escape
 from uuid import uuid4
 from pathlib import Path
 import mimetypes
@@ -23,6 +22,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from backend.database.connection import SessionLocal
 from backend.services.document_service import (
     create_document,
+    delete_document,
     get_documents_by_teacher,
 )
 
@@ -86,6 +86,10 @@ if "show_upload_form" not in st.session_state:
 if "documents_page" not in st.session_state:
     st.session_state.documents_page = 1
 
+if "document_to_delete" not in st.session_state:
+    st.session_state.document_to_delete = None
+
+
 def reset_documents_page() -> None:
     st.session_state.documents_page = 1
 
@@ -96,6 +100,14 @@ upload_message = st.session_state.pop(
 
 if upload_message:
     st.success(upload_message)
+
+delete_message = st.session_state.pop(
+    "document_delete_message",
+    None,
+)
+
+if delete_message:
+    st.success(delete_message)
 
 
 css = CSS_PATH.read_text(encoding="utf-8")
@@ -725,13 +737,24 @@ with st.container(key="documents-header"):
                 with actions_col:
                     view_col, download_col, more_col = st.columns(3)
 
+                    # ==============================
+                    # VIEW BUTTON
+                    # ==============================
+
                     with view_col:
-                        st.button(
-                            view_icon,
-                            key=f'view-{doc["Id"]}',
+                        st.link_button(
+                            label=view_icon,
+                            url=(
+                                f"document_viewer"
+                                f"?document_id={doc['Id']}"
+                            ),
                             help="View document",
                             use_container_width=True,
                         )
+
+                    # ==============================
+                    # DOWNLOAD BUTTON
+                    # ==============================
 
                     with download_col:
                         if document_path is not None:
@@ -754,13 +777,112 @@ with st.container(key="documents-header"):
                                 use_container_width=True,
                             )
 
+                    # ==============================
+                    # DELETE BUTTON
+                    # ==============================
+
                     with more_col:
-                        st.button(
+                        delete_requested = st.button(
                             more_icon,
                             key=f'more-{doc["Id"]}',
-                            help="More actions",
+                            help="Delete document",
                             use_container_width=True,
                         )
+
+
+                # ==================================================
+                # HANDLE DELETE BUTTON
+                # ==================================================
+
+                if delete_requested:
+                    st.session_state.document_to_delete = (
+                        doc["Id"]
+                    )
+
+                    st.rerun()
+
+                # ==================================================
+                # DELETE CONFIRMATION
+                # ==================================================
+
+                if (
+                        st.session_state.document_to_delete
+                        == doc["Id"]
+                ):
+                    st.warning(
+                        f'Are you sure you want to delete '
+                        f'"{doc["Name"]}"?'
+                    )
+
+                    confirm_col, cancel_col = st.columns(2)
+
+                    with confirm_col:
+                        confirm_delete = st.button(
+                            "Delete",
+                            key=f'confirm-delete-{doc["Id"]}',
+                            type="primary",
+                            use_container_width=True,
+                        )
+
+                    with cancel_col:
+                        cancel_delete = st.button(
+                            "Cancel",
+                            key=f'cancel-delete-{doc["Id"]}',
+                            use_container_width=True,
+                        )
+
+                    if cancel_delete:
+                        st.session_state.document_to_delete = None
+                        st.rerun()
+
+                    if confirm_delete:
+                        try:
+                            with SessionLocal() as session:
+                                deleted = delete_document(
+                                    session=session,
+                                    document_id=doc["Id"],
+                                    teacher_id=st.session_state[
+                                        "user_id"
+                                    ],
+                                )
+
+                            if not deleted:
+                                st.error(
+                                    "The document no longer exists."
+                                )
+
+                            else:
+                                if document_path is not None:
+                                    try:
+                                        document_path.unlink()
+
+                                    except OSError as error:
+                                        print(
+                                            "File deletion error: "
+                                            f"{error}"
+                                        )
+
+                                st.session_state.document_to_delete = None
+
+                                st.session_state[
+                                    "document_delete_message"
+                                ] = (
+                                    "Document deleted successfully."
+                                )
+
+                                st.rerun()
+
+                        except ValueError as error:
+                            st.error(str(error))
+
+                        except SQLAlchemyError as error:
+                            print(
+                                f"Document deletion error: {error}"
+                            )
+
+                            st.error(
+                                "The document could not be deleted."
+                            )
 
         # Footer
         footer_text, pagination = st.columns(

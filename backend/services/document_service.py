@@ -248,11 +248,21 @@ def update_document_status(
 def delete_document(
     session: Session,
     document_id: int,
+    teacher_id: int,
 ) -> bool:
-    document = session.get(Document, document_id)
+    document = session.get(
+        Document,
+        document_id,
+    )
 
     if document is None:
         return False
+
+    if document.teacher_id != teacher_id:
+        raise ValueError(
+            "You do not have permission "
+            "to delete this document."
+        )
 
     try:
         session.delete(document)
