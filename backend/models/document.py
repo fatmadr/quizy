@@ -110,3 +110,7 @@ class Document(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    preview_file_path: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )

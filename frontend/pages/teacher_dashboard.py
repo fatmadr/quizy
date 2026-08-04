@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
-from streamlit_cookies_controller import CookieController
-from frontend.components.sidebar import build_teacher_sidebar
 
 import streamlit as st
 from PIL import Image
+from sqlalchemy.exc import SQLAlchemyError
+from streamlit_cookies_controller import CookieController
 
 
 # ==================================================
@@ -17,6 +17,16 @@ PROJECT_ROOT = (
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+from backend.database.connection import SessionLocal
+
+from backend.services.dashboard_service import (
+    get_teacher_dashboard_stats,
+)
+
+from frontend.components.sidebar import (
+    build_teacher_sidebar,
+)
 
 from frontend.utils.auth_helpers import (
     get_current_user_name,
@@ -74,6 +84,33 @@ teacher_name = get_current_user_name(
 
 
 # ==================================================
+# DASHBOARD STATISTICS
+# ==================================================
+
+try:
+    with SessionLocal() as session:
+        dashboard_stats = get_teacher_dashboard_stats(
+            session=session,
+            teacher_id=st.session_state["user_id"],
+        )
+
+except SQLAlchemyError as error:
+    print(
+        f"Dashboard statistics error: {error}"
+    )
+
+    dashboard_stats = {
+        "documents": 0,
+        "quizzes": 0,
+        "students": 0,
+        "recent_quizzes": 0,
+    }
+
+    st.error(
+        "Dashboard statistics could not be loaded."
+    )
+
+# ==================================================
 # LOAD CSS
 # ==================================================
 
@@ -127,33 +164,31 @@ dashboard_html = (
     '</div>'
 
     '<div class="stats-grid">'
+
         '<div class="stat-card green">'
             '<div class="stat-icon">📄</div>'
             '<p>Uploaded Documents</p>'
-            '<h2>12</h2>'
-            '<small>+2 this week</small>'
+            f'<h2>{dashboard_stats["documents"]}</h2>'
         '</div>'
-
+    
         '<div class="stat-card orange">'
             '<div class="stat-icon">🧾</div>'
             '<p>Generated Quizzes</p>'
-            '<h2>28</h2>'
-            '<small>+5 this week</small>'
+            f'<h2>{dashboard_stats["quizzes"]}</h2>'
         '</div>'
-
+    
         '<div class="stat-card green">'
             '<div class="stat-icon">👥</div>'
             '<p>Active Students</p>'
-            '<h2>156</h2>'
-            '<small>+18 this week</small>'
+            f'<h2>{dashboard_stats["students"]}</h2>'
         '</div>'
-
+    
         '<div class="stat-card orange">'
             '<div class="stat-icon">🕘</div>'
             '<p>Recent Quizzes</p>'
-            '<h2>7</h2>'
-            '<small>+3 this week</small>'
+            f'<h2>{dashboard_stats["recent_quizzes"]}</h2>'
         '</div>'
+    
     '</div>'
 )
 

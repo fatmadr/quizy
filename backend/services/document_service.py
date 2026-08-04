@@ -81,13 +81,20 @@ def create_document(
     original_filename: str,
     file_path: str,
     subject: str,
+    preview_file_path: str | None = None,
     file_type: str | None = None,
     file_size_bytes: int | None = None,
 ) -> Document:
+
     cleaned_title = title.strip()
     cleaned_filename = original_filename.strip()
     cleaned_file_path = file_path.strip()
     cleaned_subject = subject.strip()
+    cleaned_preview_file_path = (
+        preview_file_path.strip()
+        if preview_file_path is not None
+        else None
+    )
 
     if not cleaned_title:
         raise ValueError("Document title is required.")
@@ -148,6 +155,7 @@ def create_document(
         title=cleaned_title,
         original_filename=cleaned_filename,
         file_path=cleaned_file_path,
+        preview_file_path=cleaned_preview_file_path,
         subject=cleaned_subject,
         file_type=(
             file_type.strip()

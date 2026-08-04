@@ -121,18 +121,13 @@ try:
             st.stop()
 
         document_title = document.title
-
-        original_filename = (
-            document.original_filename
-        )
-
+        original_filename = document.original_filename
         file_path = document.file_path
+        preview_file_path = document.preview_file_path
 
         file_type = (
-            document.file_type
-            or Path(
-                original_filename
-            ).suffix.lstrip(".")
+                document.file_type
+                or Path(original_filename).suffix.lstrip(".")
         ).upper()
 
         subject = document.subject or "Other"
@@ -193,36 +188,62 @@ st.divider()
 
 
 # ==================================================
-# PDF VIEWER
+# GET PREVIEW FILE
 # ==================================================
 
-if file_type == "PDF":
-    st.pdf(
-        document_path,
-        height=850,
+if not preview_file_path:
+    st.error(
+        "No preview is available for this document."
     )
+    st.stop()
+
+preview_path = (
+    PROJECT_ROOT / preview_file_path
+).resolve()
+
+uploads_path = UPLOADS_DIR.resolve()
+
+try:
+    preview_path.relative_to(
+        uploads_path
+    )
+
+except ValueError:
+    st.error(
+        "Invalid preview path."
+    )
+    st.stop()
+
+if not preview_path.is_file():
+    st.error(
+        "The preview file could not be found."
+    )
+    st.stop()
 
 
 # ==================================================
-# OTHER FILE TYPES
+# DISPLAY PREVIEW
 # ==================================================
 
-else:
-    st.info(
-        f"Preview is not available for "
-        f"{file_type} documents yet."
-    )
+st.pdf(
+    preview_path,
+    height=850,
+)
 
-    mime_type = (
-        mimetypes.guess_type(
-            original_filename
-        )[0]
-        or "application/octet-stream"
-    )
+# ==================================================
+# DOWNLOAD ORIGINAL DOCUMENT
+# ==================================================
 
-    st.download_button(
-        "Download document",
-        data=document_path.read_bytes(),
-        file_name=original_filename,
-        mime=mime_type,
-    )
+mime_type = (
+    mimetypes.guess_type(
+        original_filename
+    )[0]
+    or "application/octet-stream"
+)
+
+st.download_button(
+    "Download original document",
+    data=document_path.read_bytes(),
+    file_name=original_filename,
+    mime=mime_type,
+)

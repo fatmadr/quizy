@@ -26,6 +26,10 @@ from backend.services.document_service import (
     get_documents_by_teacher,
 )
 
+from backend.services.document_preview_service import (
+    create_document_preview,
+)
+
 from frontend.components.sidebar import build_teacher_sidebar
 from frontend.utils.auth_helpers import (
     get_current_user_name,
@@ -134,8 +138,28 @@ def format_file_size(
     )
 
 def get_document_path(
-    relative_file_path: str,
+    relative_file_path: str | None,
 ) -> Path | None:
+
+    if not relative_file_path:
+        return None
+
+    document_path = (
+        PROJECT_ROOT / relative_file_path
+    ).resolve()
+
+    uploads_path = UPLOADS_DIR.resolve()
+
+    try:
+        document_path.relative_to(uploads_path)
+    except ValueError:
+        return None
+
+    if not document_path.is_file():
+        return None
+
+    return document_path
+
     document_path = (
         PROJECT_ROOT / relative_file_path
     ).resolve()
@@ -296,6 +320,7 @@ with st.container(key="documents-header"):
 
             else:
                 saved_path = None
+                preview_path = None
 
                 try:
                     original_filename = Path(
@@ -332,8 +357,20 @@ with st.container(key="documents-header"):
                             / stored_filename
                     )
 
+                    # Save original file
                     saved_path.write_bytes(
                         uploaded_file.getvalue()
+                    )
+
+                    # Create PDF preview
+                    preview_directory = (
+                            teacher_upload_dir
+                            / "previews"
+                    )
+
+                    preview_path = create_document_preview(
+                        source_path=saved_path,
+                        preview_directory=preview_directory,
                     )
 
                     cleaned_title = document_title.strip()
@@ -349,24 +386,27 @@ with st.container(key="documents-header"):
                         .as_posix()
                     )
 
+                    relative_preview_path = (
+                        preview_path
+                        .relative_to(PROJECT_ROOT)
+                        .as_posix()
+                    )
+
                     with SessionLocal() as session:
                         create_document(
                             session=session,
                             teacher_id=teacher_id,
                             title=cleaned_title,
-                            original_filename=(
-                                original_filename
-                            ),
+                            original_filename=original_filename,
                             file_path=relative_file_path,
+                            preview_file_path=relative_preview_path,
                             subject=document_subject,
                             file_type=(
                                 file_extension
                                 .lstrip(".")
                                 .upper()
                             ),
-                            file_size_bytes=(
-                                uploaded_file.size
-                            ),
+                            file_size_bytes=uploaded_file.size,
                         )
 
                     st.session_state.show_upload_form = False
@@ -377,7 +417,14 @@ with st.container(key="documents-header"):
 
                     st.rerun()
 
-                except ValueError as error:
+                except (ValueError, RuntimeError) as error:
+                    if (
+                            preview_path is not None
+                            and preview_path != saved_path
+                            and preview_path.exists()
+                    ):
+                        preview_path.unlink()
+
                     if (
                             saved_path is not None
                             and saved_path.exists()
@@ -387,6 +434,13 @@ with st.container(key="documents-header"):
                     st.error(str(error))
 
                 except (OSError, SQLAlchemyError) as error:
+                    if (
+                            preview_path is not None
+                            and preview_path != saved_path
+                            and preview_path.exists()
+                    ):
+                        preview_path.unlink()
+
                     if (
                             saved_path is not None
                             and saved_path.exists()
@@ -456,6 +510,7 @@ with st.container(key="documents-header"):
                         ),
                         "UploadedAt": uploaded_at,
                         "FilePath": document.file_path,
+                        "PreviewFilePath": document.preview_file_path,
                     }
                 )
 
@@ -669,6 +724,10 @@ with st.container(key="documents-header"):
                 doc["FilePath"]
             )
 
+            preview_path = get_document_path(
+                doc["PreviewFilePath"]
+            )
+
             mime_type = (
                     mimetypes.guess_type(
                         doc["Description"]
@@ -852,15 +911,23 @@ with st.container(key="documents-header"):
                                 )
 
                             else:
-                                if document_path is not None:
-                                    try:
+                                try:
+                                    # Delete preview first,
+                                    # but only when it is a separate file.
+                                    if (
+                                            preview_path is not None
+                                            and preview_path != document_path
+                                    ):
+                                        preview_path.unlink()
+
+                                    # Delete original file
+                                    if document_path is not None:
                                         document_path.unlink()
 
-                                    except OSError as error:
-                                        print(
-                                            "File deletion error: "
-                                            f"{error}"
-                                        )
+                                except OSError as error:
+                                    print(
+                                        f"File deletion error: {error}"
+                                    )
 
                                 st.session_state.document_to_delete = None
 
