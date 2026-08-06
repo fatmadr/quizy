@@ -159,6 +159,35 @@ def get_quiz_by_document(
 
 
 # ==================================================
+# GET QUIZZES BY TEACHER
+# ==================================================
+
+def get_quizzes_by_teacher(
+    session: Session,
+    teacher_id: int,
+) -> list[Quiz]:
+    statement = (
+        select(Quiz)
+        .join(
+            Document,
+            Quiz.document_id == Document.document_id,
+        )
+        .options(
+            selectinload(Quiz.document)
+        )
+        .where(
+            Document.teacher_id == teacher_id
+        )
+        .order_by(
+            Quiz.created_at.desc()
+        )
+    )
+
+    return list(
+        session.scalars(statement).all()
+    )
+
+# ==================================================
 # GET ALL QUIZZES
 # ==================================================
 
@@ -305,6 +334,90 @@ def _build_question(
         )
 
     return question
+
+# ==================================================
+# CREATE QUIZ DRAFT
+# ==================================================
+
+def create_quiz_draft(
+    session: Session,
+    teacher_id: int,
+    document_id: int,
+    title: str,
+    description: str | None = None,
+    difficulty: str = "medium",
+    time_limit_minutes: int | None = None,
+) -> Quiz:
+
+    document = session.get(
+        Document,
+        document_id,
+    )
+
+    if document is None:
+        raise ValueError(
+            "Document not found."
+        )
+
+    if document.teacher_id != teacher_id:
+        raise ValueError(
+            "You cannot create a quiz "
+            "from another teacher's document."
+        )
+
+    cleaned_title = _clean_required_text(
+        title,
+        "Quiz title",
+        maximum_length=200,
+    )
+
+    cleaned_description = _clean_optional_text(
+        description
+    )
+
+    normalized_difficulty = (
+        difficulty.strip().lower()
+    )
+
+    if normalized_difficulty not in VALID_DIFFICULTIES:
+        raise ValueError(
+            "Quiz difficulty must be 'easy', "
+            "'medium', or 'hard'."
+        )
+
+    if time_limit_minutes is not None:
+        if (
+            isinstance(time_limit_minutes, bool)
+            or not isinstance(
+                time_limit_minutes,
+                int,
+            )
+            or time_limit_minutes <= 0
+        ):
+            raise ValueError(
+                "Time limit must be "
+                "a positive integer."
+            )
+
+    new_quiz = Quiz(
+        document_id=document_id,
+        title=cleaned_title,
+        description=cleaned_description,
+        status="draft",
+        difficulty=normalized_difficulty,
+        time_limit_minutes=time_limit_minutes,
+    )
+
+    try:
+        session.add(new_quiz)
+        session.commit()
+        session.refresh(new_quiz)
+
+        return new_quiz
+
+    except SQLAlchemyError:
+        session.rollback()
+        raise
 
 
 # ==================================================
