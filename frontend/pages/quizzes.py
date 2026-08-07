@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import streamlit as st
+import time
 from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
 from streamlit_cookies_controller import (
@@ -35,6 +36,18 @@ from backend.database.connection import (
 from backend.services.document_service import (
     get_document_by_id,
     get_documents_by_teacher,
+)
+
+from backend.services.text_chunk_service import (
+    split_text_into_chunks,
+)
+
+from backend.services.embedding_service import (
+    create_embeddings,
+)
+
+from backend.services.retrieval_service import (
+    retrieve_relevant_chunks,
 )
 
 from backend.services.document_text_service import (
@@ -194,6 +207,56 @@ except SQLAlchemyError as error:
         "Documents could not be loaded."
     )
 
+    # ==================================================
+    # PREPROCESS DOCUMENT
+    # ==================================================
+
+
+def preprocess_document(
+        document_id: int,
+        document_path: Path,
+):
+    cache_key = (
+        f"document_ai_{document_id}"
+    )
+
+    if cache_key in st.session_state:
+        print(
+            "Using cached document embeddings."
+        )
+
+        return st.session_state[
+            cache_key
+        ]
+
+    print(
+        "Processing document for the first time..."
+    )
+
+    extracted_text = extract_document_text(
+        document_path
+    )
+
+    chunks = split_text_into_chunks(
+        extracted_text
+    )
+
+    embeddings = create_embeddings(
+        chunks
+    )
+
+    result = {
+        "text": extracted_text,
+        "chunks": chunks,
+        "embeddings": embeddings,
+    }
+
+    st.session_state[
+        cache_key
+    ] = result
+
+    return result
+
 
 # ==================================================
 # QUIZZES PAGE CONTENT
@@ -271,109 +334,227 @@ else:
         )
 
         # ==================================================
-        # CREATE QUIZ DRAFT
+        # GENERATE QUIZ
         # ==================================================
 
-    if create_clicked:
-        try:
-            document_id = document_options[
-                selected_document
-            ]
+        if create_clicked:
+            try:
+                document_id = document_options[
+                    selected_document
+                ]
 
-            # ==========================================
-            # GET SELECTED DOCUMENT
-            # ==========================================
+                # ==========================================
+                # GET SELECTED DOCUMENT
+                # ==========================================
 
-            with SessionLocal() as session:
-                document = get_document_by_id(
-                    session=session,
-                    document_id=document_id,
-                )
-
-                if document is None:
-                    raise ValueError(
-                        "Document not found."
+                with SessionLocal() as session:
+                    document = get_document_by_id(
+                        session=session,
+                        document_id=document_id,
                     )
 
-                if (
-                        document.teacher_id
-                        != st.session_state["user_id"]
-                ):
-                    raise ValueError(
-                        "You do not have permission "
-                        "to use this document."
+                    if document is None:
+                        raise ValueError(
+                            "Document not found."
+                        )
+
+                    if (
+                            document.teacher_id
+                            != st.session_state["user_id"]
+                    ):
+                        raise ValueError(
+                            "You do not have permission "
+                            "to use this document."
+                        )
+
+                    document_file_path = (
+                        document.file_path
                     )
 
-                document_file_path = (
-                    document.file_path
+                # ==========================================
+                # GET REAL FILE PATH
+                # ==========================================
+
+                document_path = (
+                        PROJECT_ROOT
+                        / document_file_path
+                ).resolve()
+
+                # ==========================================
+                # PREPROCESS DOCUMENT
+                # ==========================================
+
+                start_time = time.perf_counter()
+
+                processed_document = preprocess_document(
+                    document_id=document_id,
+                    document_path=document_path,
                 )
 
-            # ==========================================
-            # GET REAL FILE PATH
-            # ==========================================
+                print(
+                    "Document preprocessing:",
+                    round(
+                        time.perf_counter()
+                        - start_time,
+                        2,
+                    ),
+                    "seconds",
+                )
 
-            document_path = (
-                    PROJECT_ROOT
-                    / document_file_path
-            ).resolve()
+                extracted_text = processed_document[
+                    "text"
+                ]
 
-            # ==========================================
-            # EXTRACT DOCUMENT TEXT
-            # ==========================================
+                chunks = processed_document[
+                    "chunks"
+                ]
 
-            extracted_text = extract_document_text(
-                document_path
-            )
+                embeddings = processed_document[
+                    "embeddings"
+                ]
 
-            print(
-                "Extracted characters:",
-                len(extracted_text),
-            )
+                print(
+                    "Extracted characters:",
+                    len(extracted_text),
+                )
 
-            # ==========================================
-            # CREATE QUIZ DRAFT
-            # ==========================================
+                print(
+                    "Number of chunks:",
+                    len(chunks),
+                )
 
-            with SessionLocal() as session:
-                quiz = create_quiz_draft(
-                    session=session,
-                    teacher_id=st.session_state[
-                        "user_id"
-                    ],
-                    document_id=document_id,
-                    title=quiz_title,
-                    description=quiz_description,
-                    difficulty=difficulty.lower(),
-                    time_limit_minutes=(
-                        int(time_limit)
-                        if time_limit is not None
-                        else None
+                print(
+                    "Number of embeddings:",
+                    len(embeddings),
+                )
+
+                if embeddings:
+                    print(
+                        "Embedding dimensions:",
+                        len(embeddings[0]),
+                    )
+
+                # ==========================================
+                # RETRIEVAL QUERY
+                # ==========================================
+
+                retrieval_query = (
+                    f"Important concepts, definitions, "
+                    f"explanations and exercises suitable "
+                    f"for a {difficulty.lower()} quiz "
+                    f"based on this course document."
+                )
+
+                # ==========================================
+                # QUERY EMBEDDING
+                # ==========================================
+
+                start_time = time.perf_counter()
+
+                query_embedding = create_embeddings(
+                    [retrieval_query]
+                )[0]
+
+                print(
+                    "Query embedding:",
+                    round(
+                        time.perf_counter()
+                        - start_time,
+                        2,
+                    ),
+                    "seconds",
+                )
+
+                # ==========================================
+                # RETRIEVE RELEVANT CHUNKS
+                # ==========================================
+
+                start_time = time.perf_counter()
+
+                relevant_chunks = retrieve_relevant_chunks(
+                    chunks=chunks,
+                    chunk_embeddings=embeddings,
+                    query_embedding=query_embedding,
+                    top_k=min(
+                        5,
+                        len(chunks),
                     ),
                 )
 
-            st.session_state.quiz_message = (
-                f'Quiz "{quiz.title}" '
-                f'created successfully.'
-            )
+                print(
+                    "Retrieval:",
+                    round(
+                        time.perf_counter()
+                        - start_time,
+                        2,
+                    ),
+                    "seconds",
+                )
 
-            st.rerun()
+                print(
+                    "Relevant chunks:",
+                    len(relevant_chunks),
+                )
 
-        except (
-                ValueError,
-                FileNotFoundError,
-        ) as error:
-            st.error(
-                str(error)
-            )
+                for index, chunk in enumerate(
+                        relevant_chunks,
+                        start=1,
+                ):
+                    print(
+                        f"\n--- Relevant Chunk {index} ---"
+                    )
 
-        except SQLAlchemyError as error:
-            print(
-                f"Quiz creation error: {error}"
-            )
+                    print(
+                        chunk[:500]
+                    )
 
-            st.error(
-                "The quiz could not be created."
-            )
+                # ==========================================
+                # CREATE QUIZ DRAFT
+                # ==========================================
+
+                with SessionLocal() as session:
+                    quiz = create_quiz_draft(
+                        session=session,
+                        teacher_id=st.session_state[
+                            "user_id"
+                        ],
+                        document_id=document_id,
+                        title=quiz_title,
+                        description=quiz_description,
+                        difficulty=difficulty.lower(),
+                        time_limit_minutes=(
+                            int(time_limit)
+                            if time_limit is not None
+                            else None
+                        ),
+                    )
+
+                st.session_state[
+                    "quiz_message"
+                ] = (
+                    f'Quiz "{quiz.title}" '
+                    f'created successfully.'
+                )
+
+                st.rerun()
+
+            except (
+                    ValueError,
+                    FileNotFoundError,
+                    RuntimeError,
+            ) as error:
+                st.error(
+                    str(error)
+                )
+
+            except SQLAlchemyError as error:
+                print(
+                    f"Quiz creation error: {error}"
+                )
+
+                st.error(
+                    "The quiz could not be created."
+                )
 
     # ==================================================
     # LOAD TEACHER QUIZZES
